@@ -48,11 +48,11 @@ def get_book(book_id):
     # TODO add utf-8 check
     return requests.get(links[0]).text
         
-def save_book(path, book_id):
-    f_book = open("{}/{}.txt".format(path,book_id), "w")
+def save_book(folder, book_id):
+    """ save the book to txt file in folder"""
+    f_book = open("{}/{}.txt".format(folder,book_id), "w")
     f_book.write(get_book(book_id))
     f_book.close()
-
 
 # testing
 # if you run this script manually create "t" folder
