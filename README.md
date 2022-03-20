@@ -1,2 +1,3 @@
-# gutenberg_txt_extractor
+# Simple Project Gutenberg book extrator
 Extract txt files from gutenberg
+
