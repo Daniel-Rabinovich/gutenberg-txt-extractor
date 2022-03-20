@@ -2,11 +2,9 @@ import requests, csv, re
 
 
 # TODO
-# 1. read csv file
-# 2. filter unneeded book
-# 3. extract books
-#
-
+# [X] read csv file
+# [X] filter unneeded book
+# [V] extract books
 
 # ****** extra info for this script ******
 # gutenberg mirror list: https://www.gutenberg.org/MIRRORS.ALL
@@ -40,14 +38,15 @@ def extract_txt_links(path, html_data):
     return links
     
 def get_book(book_id):
-        query = "https://gutenberg.pglaf.org/{}".format(parse_id(book_id))
-        response = requests.get(query)
-        links = extract_txt_links(query, response.text)
-        
-        # for now get only the first link
-        print(links[0])
-        # TODO add utf-8 hceck
-        return requests.get(links[0]).text
+    """ fetch book as string and return it """
+    query = "https://gutenberg.pglaf.org/{}".format(parse_id(book_id))
+    response = requests.get(query)
+    links = extract_txt_links(query, response.text)
+    
+    # for now get only the first link
+    print(links[0])
+    # TODO add utf-8 check
+    return requests.get(links[0]).text
         
 def save_book(path, book_id):
     f_book = open("{}/{}.txt".format(path,book_id), "w")
