@@ -1,4 +1,4 @@
-import requests, csv, re, sys
+import requests, csv, re, sys, os
 
 # *****************************************
 #  Helper functions
@@ -123,6 +123,9 @@ main_txt_dir = sys.argv[1]
 for book_id in books_ids:
     
     if int(book_id) < int(sys.argv[2]) or int(book_id) >= int(sys.argv[3]):
+        continue
+
+    if os.path.isfile("{}/{}.txt".format(sys.argv[1],book_id)):
         continue
     
     print("pulling book #{}".format(book_id))
