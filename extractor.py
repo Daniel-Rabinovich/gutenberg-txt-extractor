@@ -1,4 +1,4 @@
-import requests, csv, re
+import requests, csv, re, sys
 
 # *****************************************
 #  Helper functions
@@ -118,11 +118,14 @@ books_ids = get_book_ids_from_dict(books)
 
 # handle pulling books 
 mirror = "https://gutenberg.pglaf.org"
-main_txt_dir = "books"
+main_txt_dir = sys.argv[1]
 
-for book_id in range(101,120):
-
-    print("starting book #{}".format(book_id))
+for book_id in books_ids:
+    
+    if int(book_id) < int(sys.argv[2]) or int(book_id) >= int(sys.argv[3]):
+        continue
+    
+    print("pulling book #{}".format(book_id))
     
     # parse book url
     book_url = get_full_book_path(mirror, book_id)
