@@ -117,7 +117,8 @@ remove_unwanted_categories(books)
 books_ids = get_book_ids_from_dict(books)
 
 # handle pulling books 
-mirror = "https://gutenberg.pglaf.org"
+#mirror = "https://gutenberg.pglaf.org"
+mirror = "https://gutenberg.readingroo.ms/"
 main_txt_dir = sys.argv[1]
 
 for book_id in books_ids:
@@ -128,6 +129,7 @@ for book_id in books_ids:
     if os.path.isfile("{}/{}.txt".format(sys.argv[1],book_id)):
         continue
     
+    
     print("pulling book #{}".format(book_id))
     
     # parse book url
@@ -135,6 +137,10 @@ for book_id in books_ids:
     
     # pull txt links from page
     txt_urls = get_txt_links_list(book_url)
+    
+    # check that there are links to follow 
+    if len(txt_urls) == 0:
+        continue
     
     # choose url (for now choose the first one)
     chosen_txt_url = choose_url(txt_urls)
