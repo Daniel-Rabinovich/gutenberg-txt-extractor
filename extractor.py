@@ -13,6 +13,7 @@ def csv_to_dict(path="pg_catalog.csv"):
             catalog[row['Text#']] = {
                 'language':row['Language'],
                 'subjects':row['Subjects'],
+                'type': row['Type']
             }
             line_count += 1
     return catalog
@@ -56,6 +57,15 @@ def check_good_category(books_dict, book_id):
         return False
     else:
         return False
+
+def remove_non_text_books(books_dict):
+    keys_to_remove = []
+    for id in books_dict.keys():
+        if books_dict[id]["type"] != "Text":
+            keys_to_remove.append(id)
+
+    for key in keys_to_remove:
+        books_dict.pop(key, None)
 
 def get_book_ids_from_dict(books_dict):
     ids = []
@@ -112,6 +122,7 @@ def choose_url(arr):
 books = csv_to_dict()
 remove_non_english_books(books)
 remove_unwanted_categories(books)
+remove_non_text_books(books)
 
 # get only the ids 
 books_ids = get_book_ids_from_dict(books)
