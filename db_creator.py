@@ -90,6 +90,8 @@ class Catalog(Singleton):
         return self.__dict
 
 class BookMetadata:
+    """ this class holds the metadata of a single book,
+    also generates the gender and estimated year automatically """
     
     def __init__(self, name_gender_singelton, b_id, year, title, authors, filepath):
         self.__book_id = b_id
@@ -140,7 +142,7 @@ class BookMetadata:
         return self.__gender
 
     def get_id(self):
-        return self.__book_id
+        return int(self.__book_id)
     
     def get_year(self):
         return self.__year
@@ -155,6 +157,7 @@ class BookMetadata:
         return self.__filepath
     
 class Library:
+    """ this class holds a dictionary of BooksMetadata object """
     
     def __init__(self, path, catalog, name_gender):
         self.__books = {}
@@ -193,6 +196,53 @@ class Library:
         else:
             return None
 
+class Save:
+    
+    def __init__(self, db_path):
+        self.__path = db_path
+        self.__drop_tables()
+        self.__create_db()
+        
+        
+    def __drop_tables(self):
+        con = sqlite3.connect(self.__path)
+        con.execute("DROP TABLE Metadata")
+        con.execute("DROP TABLE Books")
+        con.commit()
+        con.close()
+        
+    def __create_db(self):
+        con = sqlite3.connect(self.__path)
+        con.execute("""
+            create table if not exists "Metadata" (
+            "book_id"           INTEGER NOT NULL,
+            "title"             TEXT NOT NULL,
+            "author"            TEXT NOT NULL,
+            "gender"            TEXT,
+            "year"              INTEGER NOT NULL,
+            PRIMARY KEY("book_id")
+            );
+            """)
+        con.execute("""
+            create table if not exists "Books" (
+            "book_id"           INTEGER NOT NULL,
+            "paragraph_id"      INTEGER NOT NULL,
+            "text"              TEXT NOT NULL,
+            "word_count"        INTEGER NOT NULL,
+            "stopword_count"    INTEGER NOT NULL,
+            PRIMARY KEY("book_id","paragraph_id")
+            );
+            """)
+        con.commit()
+        con.close()
+    
+    def insert_metadata(self, v):
+        con = sqlite3.connect(self.__path)
+        query = "INSERT INTO Metadata VALUES(?,?,?,?,?)"
+        con.execute(query,tuple(v))
+        con.commit()
+        con.close()
+
 # *************************
 # Main
 # *************************
@@ -201,16 +251,17 @@ def main():
     gender_csv_path = "csv/name_gender.csv"
     catalog_csv_path = "csv/pg_catalog.csv"
     books_dir_path = "books/"
+    db_path = "data.db"
     
     gender = NameGender(gender_csv_path)
     catalog = Catalog(catalog_csv_path)
     lib = Library(books_dir_path, catalog, gender)
     books = lib.get_books()
-    count = 0
+    db = Save(db_path)
     for key in books.keys():
-        count = count + 1
-        print(books[key])
+        book = books[key]
+        values =[book.get_id(), book.get_title(), book.get_authors(), book.get_gender(), book.get_year()]
+        db.insert_metadata(values)
 
-    print(count)
 if __name__ == "__main__":
     main()
