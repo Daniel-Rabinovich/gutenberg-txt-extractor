@@ -63,7 +63,6 @@ class Catalog(Singleton):
         self.__dict = {}
         self.__create_dict()
        
-        
     def get_path(self):
         return self.__path
 
@@ -121,9 +120,11 @@ class BookMetadata:
     
     def __update_estimated_year(self):
         authors = self.__extract_author_list()
-        for index in range(len(authors)-1,0,-1):
-            found_years = re.findall("\d\d\d\d", authors[index])
-            amount = len(found_years)
+        for author in authors:
+            amount = 0
+            if len(re.findall("\[Illustrator\]",author)) == 0:
+                found_years = re.findall("\d\d\d\d", author)
+                amount = len(found_years)
             if  amount == 1:
                 self.__year = int(found_years[0])
             elif amount > 1:
@@ -347,14 +348,7 @@ def main():
     # (automatically filters them)
     lib = Library(books_dir_path, catalog_csv_path, gender_csv_path, db_path)
     
-    
-    books = lib.get_books()
-    
-    count = 0
-    for key in books.keys():
-        count += 1
-    print(f"There are {count} valid books")    
-    
+    # start creating db (old db will get deleted)
     lib.start()
     
 if __name__ == "__main__":
