@@ -220,6 +220,10 @@ class Library:
         books_inserted = 0
         total_books = len(books_ids)
         for key in books_ids:
+            if db.check_id_exists(key):
+                print("book exists {}".format(key))
+                continue
+            
             book = self.get_book(key)
             print(f"({books_inserted}/{total_books}) inserting book #{key}")
             proccessed_book = []
@@ -263,6 +267,7 @@ class Library:
                 db.con.commit()
         db.con.commit()
         db.con.close()
+        
     def __word_count(self,paragraph):
         tmp = paragraph.split(" ")
         return len(tmp)
@@ -276,7 +281,7 @@ class Library:
         return count
     
     def __read_text_from_file(self, key):
-        f = open(self.get_book(key).get_filepath(),'r',encoding='utf8')
+        f = open(self.get_book(key).get_filepath(),'r',encoding='utf8', errors='ignore')
         return f.read()
     
     def get_books(self):
@@ -293,7 +298,7 @@ class Save:
     def __init__(self, db_path):
         self.__path = db_path
         self.con = sqlite3.connect(self.__path)
-        self.__drop_tables()
+        #self.__drop_tables()
         self.__create_db()
        
         
@@ -333,6 +338,9 @@ class Save:
         query = f"INSERT INTO {table} VALUES(?,?,?,?,?)"
         self.con.execute(query,tuple(v))
 
+    def check_id_exists(self,book_id):
+        res = self.con.execute(f"SELECT 1 FROM Metadata WHERE book_id = {book_id}")
+        return res.fetchone() is not None
 # *************************
 # Main
 # *************************
