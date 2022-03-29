@@ -1,4 +1,4 @@
-import re, sqlite3
+import re, sqlite3, csv
 import networkx as nx
 from networkx import strongly_connected_components
 
@@ -24,6 +24,9 @@ class Book:
     
     def get_gender(self):
         return self.gender
+    
+    def get_list(self):
+        return [self.book_id, self.authors, self.gender]
     
     def __remove_illustrators(self):
         new_authors = []
@@ -121,14 +124,41 @@ def split_train_test(scc, books, split=0.8):
 
     return m_train, m_test, f_train, f_test
 
+def save_to_csv(male_train, male_test, female_train, female_test):
+    
+    male_train = [x.get_list() for x in male_train]
+    male_test = [x.get_list() for x in male_test]
+    female_train = [x.get_list() for x in female_train]
+    female_test = [x.get_list() for x in female_test]
+    
+    write_csv("train-test/male_train.csv", male_train)
+    write_csv("train-test/male_test.csv", male_test)
+    write_csv("train-test/female_train.csv", female_train)
+    write_csv("train-test/female_test.csv", female_test)
+
+def write_csv(name, data):
+    with open(name, 'w') as csvfile: 
+        csvwriter = csv.writer(csvfile) 
+        csvwriter.writerows(data)
+        
+
 # **************************
 # Main
 # **************************
 
-t = get_metadata_table("../project/database/data.db")
+t = get_metadata_table("data.db")
 g = build_graph(t)
 y = g.to_directed()
 scc = strongly_connected_components(y)
 m_tr,m_te,f_tr,f_te = split_train_test(scc,t,0.8)
 
-print(f"m_tr: {len(m_tr)},m_te: {len(m_te)},f_tr: {len(f_tr)},f_te: {len(f_te)}")
+save_to_csv(m_tr,m_te,f_tr,f_te)
+total_male = len(m_tr) + len(m_te)
+total_female = len(f_tr) + len(f_te)
+print(f"""
+male_train: {len(m_tr)} ({(100*len(m_tr))/total_male}%)
+male_test: {len(m_te)} ({(100*len(m_te))/total_male}%)
+female_train: {len(f_tr)} ({(100*len(f_tr))/total_female}%)
+female_test: {len(f_te)} ({(100*len(f_te))/total_female}%)
+""")
+print(f"total books in train/test split: {len(m_tr) + len(m_te) + len(f_tr) + len(f_te)}")
