@@ -7,7 +7,7 @@ from networkx import strongly_connected_components
 
 class Book:
     
-    def __init__(self,book_id, title, authors, gender):
+    def __init__(self,book_id, authors, gender, title):
         self.book_id = book_id
         self.title = title
         self.authors = authors 
@@ -30,7 +30,7 @@ class Book:
         return self.gender
     
     def get_list(self):
-        return [self.book_id, self.title, self.authors, self.gender]
+        return [self.book_id, self.authors, self.gender, self.title]
     
     def __remove_illustrators(self):
         new_authors = []
@@ -51,17 +51,17 @@ def get_metadata_table(path):
     con = sqlite3.connect(path)
     cur = con.cursor()
     statment = cur.execute("""
-        SELECT book_id,title,author,gender 
+        SELECT book_id,author,gender,title
         FROM Metadata 
         WHERE gender in ('M','F')""")
     
     books = []
     for row in statment:
         book_id = row[0]
-        title = re.sub("[^a-zA-Z0-9\, ]","",row[1])
-        authors = row[2].split(";")
-        gender = row[3]
-        books.append(Book(book_id,title,[a.strip() for a in authors],gender))        
+        authors = row[1].split(";")
+        gender = row[2]
+        title = re.sub("[^a-zA-Z0-9\, ]","",row[3])
+        books.append(Book(book_id,[a.strip() for a in authors],gender,title))        
         
     con.close() #close connection 
     
