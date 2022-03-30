@@ -18,7 +18,7 @@ class Book:
         return f"({self.book_id}, {self.authors}, {self.gender})"
     
     def get_id(self):
-        return int(self.book_id)
+        return self.book_id
     
     def get_title(self):
         return self.title
@@ -30,7 +30,7 @@ class Book:
         return self.gender
     
     def get_list(self):
-        return [self.book_id, self.authors, self.gender, self.title]
+        return [self.book_id, self.gender]
     
     def __remove_illustrators(self):
         new_authors = []
@@ -95,15 +95,19 @@ def total_books_by_gender(books):
             female = female + 1
     return male, female
 
-def split_train_test(scc, books, split=0.8):
+def split_train_test(scc, books, train=0.8, test=0.1,val=0.1):
     male_total, female_total = total_books_by_gender(books)
-    m_train_target = split*male_total
-    m_test_target = (1-split)*male_total
-    f_train_target = split*female_total
-    f_test_target = (1-split)*female_total
     
-    m_train, m_test = [], []
-    f_train, f_test = [], []
+    m_train_target = train*male_total
+    m_test_target = test*male_total
+    m_val_target = val*male_total
+    
+    f_train_target = train*female_total
+    f_test_target = test*female_total
+    f_val_target = val*female_total
+    
+    m_train, m_test, m_val = [], [], []
+    f_train, f_test, f_val = [], [], []
     
     for book_set in scc:
         books_amount = len(book_set)
@@ -113,34 +117,45 @@ def split_train_test(scc, books, split=0.8):
                 for book in book_set:
                     m_train.append(book)
                 m_train_target = m_train_target - books_amount
-            else:
+            elif m_test_target - books_amount > 0:
                 for book in book_set:
                     m_test.append(book)
                 m_test_target = m_test_target - books_amount
+            else: 
+                for book in book_set:
+                    m_val.append(book)
+                m_val_target = m_val_target - books_amount
         if gender == "F":
             if f_train_target - books_amount > 0:
                 for book in book_set:
                     f_train.append(book)
                 f_train_target = f_train_target - books_amount    
-            else:
+            elif f_test_target - books_amount > 0:
                 for book in book_set:
                     f_test.append(book)
                 f_test_target = f_test_target - books_amount
+            else:
+                for book in book_set:
+                    f_val.append(book)
+                f_val_target = f_val_target - books_amount
 
-    return m_train, m_test, f_train, f_test
+    return m_train, m_test, m_val, f_train, f_test, f_val
 
-def save_to_csv(male_train, male_test, female_train, female_test):
+def save_to_csv(male_train, male_test, male_val, female_train, female_test, female_val):
     
     male_train = [x.get_list() for x in male_train]
     male_test = [x.get_list() for x in male_test]
+    male_val = [x.get_list() for x in male_val]
     female_train = [x.get_list() for x in female_train]
     female_test = [x.get_list() for x in female_test]
+    female_val = [x.get_list() for x in female_val]
     
-    write_csv("train-test/male_train.csv", male_train)
-    write_csv("train-test/male_test.csv", male_test)
-    write_csv("train-test/female_train.csv", female_train)
-    write_csv("train-test/female_test.csv", female_test)
-
+    
+    write_csv("train-test/train.csv", male_train + female_train)
+    write_csv("train-test/test.csv", male_test + female_test)
+    write_csv("train-test/validate.csv", male_val + female_val)
+    
+    
 def write_csv(name, data):
     with open(name, 'w') as csvfile: 
         csvwriter = csv.writer(csvfile) 
@@ -155,15 +170,19 @@ t = get_metadata_table("data.db")
 g = build_graph(t)
 y = g.to_directed()
 scc = strongly_connected_components(y)
-m_tr,m_te,f_tr,f_te = split_train_test(scc,t,0.8)
+m_tr,m_te, m_va, f_tr,f_te, f_va = split_train_test(scc,t,0.8)
 
-save_to_csv(m_tr,m_te,f_tr,f_te)
-total_male = len(m_tr) + len(m_te)
-total_female = len(f_tr) + len(f_te)
+save_to_csv(m_tr,m_te,m_va,f_tr,f_te,f_va)
+total_male = len(m_tr) + len(m_te) + len(m_va)
+total_female = len(f_tr) + len(f_te) + len(f_va)
+
+# print statistics
 print(f"""
 male_train: {len(m_tr)} ({(100*len(m_tr))/total_male}%)
 male_test: {len(m_te)} ({(100*len(m_te))/total_male}%)
+male_test: {len(m_va)} ({(100*len(m_va))/total_male}%)
 female_train: {len(f_tr)} ({(100*len(f_tr))/total_female}%)
 female_test: {len(f_te)} ({(100*len(f_te))/total_female}%)
+female_val: {len(f_va)} ({(100*len(f_va))/total_female}%)
 """)
-print(f"total books in train/test split: {len(m_tr) + len(m_te) + len(f_tr) + len(f_te)}")
+print(f"total books in train/test split: {len(m_tr) + len(m_te) + len(m_va) + len(f_tr) + len(f_te) + len(f_va)}")
