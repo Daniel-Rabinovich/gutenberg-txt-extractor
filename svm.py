@@ -56,6 +56,7 @@ def concatenation(df):
                 data["book_id"].append(id)
                 data["text"].append(str(sen))
                 data["gender"].append(gender)
+                sen = []
         if counter > 0:
             data["book_id"].append(id)
             data["text"].append(str(sen))
