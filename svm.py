@@ -7,14 +7,19 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn import svm
 from sklearn.metrics import accuracy_score,f1_score,precision_score,recall_score,confusion_matrix
-import sqlite3
+import sqlite3, sys
 
+if len(sys.argv) != 3:
+    print("exmaple: python -u svm.py 25 100")
+    print("first arg is sentence amount")
+    print("second arg is vocabulary size")
+    exit
 
 CONFIG={
     # concatenation
-    "number_of_sentance" : 25
+    "number_of_sentance" : sys.argv[1]
     # vocabluary size
-    ,"tf_idf_max_features" : 1000
+    ,"tf_idf_max_features" : sys.argv[2]
     # SVM config
     ,"svm": {
         'C':1.0
