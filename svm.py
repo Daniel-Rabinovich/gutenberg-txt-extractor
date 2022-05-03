@@ -11,13 +11,10 @@ import sqlite3
 
 
 CONFIG={
-    # sentance selection:
-     "min_text_len" : 10         # in number of words (before stopword removal and lematization)
-    ,"max_text_len" : 50         # 
     # concatenation
-    ,"number_of_sentance" : 100
+    "number_of_sentance" : 25
     # vocabluary size
-    ,"tf_idf_max_features" : 5000
+    ,"tf_idf_max_features" : 1000
     # SVM config
     ,"svm": {
         'C':1.0
@@ -32,11 +29,7 @@ def open_data(path):
     with sqlite3.connect(path) as con:
         query = """SELECT b.book_id,paragraph_id,text,gender,word_count
         FROM Books b,Metadata m 
-        WHERE b.book_id=m.book_id""" + \
-        " and b.word_count >= " + \
-        str(CONFIG["min_text_len"]) + \
-        " and b.word_count <= " + \
-        str(CONFIG["max_text_len"])
+        WHERE b.book_id=m.book_id"""
         return pd.read_sql_query(query,con)
 
 def concatenation(df):
@@ -49,8 +42,10 @@ def concatenation(df):
         gender = book_paragraphs.iloc[0]["gender"]
         for row in book_paragraphs.iterrows():
             if counter < CONFIG["number_of_sentance"]:
-                sen += eval(row[1]['text'])
-                counter += 1
+                if(len(eval(row[1]['text']))):
+                    sen += eval(row[1]['text'])
+                    counter += 1
+
             else:
                 counter = 0
                 data["book_id"].append(id)
