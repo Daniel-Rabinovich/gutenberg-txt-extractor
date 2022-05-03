@@ -13,7 +13,7 @@ if len(sys.argv) != 3:
     print("exmaple: python -u svm.py 25 100")
     print("first arg is sentence amount")
     print("second arg is vocabulary size")
-    exit
+    exit()
 
 CONFIG={
     # concatenation
