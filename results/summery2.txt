@@ -1,0 +1,109 @@
+sentences longer then 20 words where cut into smaller pieces 
+processing: tokenization -> stop-word removal -> pos tagging -> lemmatization 
+            -> concatenation of (25/50/100) sentences in chronological order
+            -> tfidf with (500/1k/5k/10k) vocabulary
+svm config:  C:1.0 (default) ,kernel:'linear'
+
+
+ - - - - - - - - - - - - -
+| s - number of sentences |
+| v - vocabulary size     |
+ - - - - - - - - - - - - -
+
+ test
+------
+accuracy:
+s\v   500   1k   5k   10k
+025  0.70  0.71      0.73
+050  0.72  0.73 0.74 0.75
+100  0.73  0.74 0.76 0.76
+
+precision:
+s\v   500   1k   5k   10k
+025  0.96  0.93      0.91
+050  0.92  0.92 0.91 0.91
+100  0.91  0.91 0.92 0.93
+
+recall:
+s\v   500   1k   5k   10k
+025  0.70  0.71      0.74
+050  0.72  0.73 0.75 0.75
+100  0.74  0.75 0.77 0.76
+
+f1:
+s\v   500   1k   5k   10k
+025  0.81  0.81      0.82
+050  0.81  0.82 0.82 0.83
+100  0.82  0.82 0.83 0.84
+
+confusion matrix: 
+                       	    actual 
+                    female          male                    
+predicted female [[ true female, false female
+predicted male      false male, true male ]]
+
+s\v      500             1k              5k            10k
+025  [[ 2679  1145]  [[ 3913  1887]                  [[ 5448  2520]
+      [11819 27206]]  [10585 26464]]                  [ 9050 25831]]                         
+                                                          
+050  [[ 2316  1098]  [[ 2635  1209]  [[ 3154  1325]  [[ 3083  1231]                  
+      [ 5095 13414]]  [ 4776 13303]]  [ 4257 13187]]  [ 4328 13281]]
+                                                                        
+100  [[1411  646]    [[1531  669]    [[1727  620]    [[1643  531]
+      [2354 6740]]    [2234 6717]]    [2038 6766]]    [2122 6855]]
+
+
+
+
+ 
+                                                                   
+
+
+ Validate
+----------
+accuracy:
+s\v   500  1k   5k   10k
+025  0.67 0.69      0.70
+050  0.70 0.71 0.73 0.72
+100  0.71 0.73 0.76 0.74
+precision:
+s\v   500  1k   5k   10k
+025  0.96 0.94      0.88
+050  0.93 0.92 0.90 0.88
+100  0.91 0.91 0.91 0.90
+recall:
+s\v   500  1k   5k   10k
+025  0.67 0.69      0.71
+050  0.70 0.71 0.74 0.73
+100  0.72 0.73 0.76 0.75
+f1:
+s\v   500  1k   5k   10k
+025  0.79 0.79       0.79
+050  0.79 0.80 0.81 0.80
+100  0.80 0.81 0.83 0.82
+
+confusion matrix:
+                       	actual 
+                    female          male                    
+predicted female [[ true female, false female
+predicted male      false male, true male ]]
+
+s\v       500            1k            5k             10k
+025  [[ 2857  1287]  [[ 4616  2299]                  [[ 7052  4227]                  
+      [16873 34890]]  [15114 33878]]                  [12678 31950]]                  
+                                                                    
+050  [[ 2783  1345]  [[ 3307  1508]  [[ 4194  1783]  [[ 4108  2141]
+      [ 7298 17157]]  [ 6774 16994]]  [ 5887 16719]]  [ 5973 16361]]
+ 
+100  [[1760  817]    [[1990  844]    [[2457  861]    [[2258  955]
+      [3351 8591]]    [3121 8564]]    [2654 8547]]    [2853 8453]]
+                                                               
+ 
+ 
+
+
+
+
+                                         
+ 
+ 
