@@ -294,6 +294,6 @@ if __name__ == "__main__":
         
         if books_in_db % 60 == 0:
             con.commit()
-            break        
+            
     con.commit()
     con.close()
