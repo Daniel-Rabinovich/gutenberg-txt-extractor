@@ -141,6 +141,7 @@ def read_text_from_file(dir_path, key):
     return f.read()
 
 def get_counter_stats(sents, sw):
+    sents = sents.split(" ")
     swc, wc = 0, 0
     for word in sents:
         if word in sw:
@@ -157,7 +158,7 @@ if __name__ == "__main__":
     name_gender_csv_path = "csv/name_gender.csv"
     gutenberg_catalog_csv_path = "csv/pg_catalog.csv"
     raw_books_path = "books/"
-    database_path = "tmp.db"
+    database_path = "data.db"
     
     # read author-gender csv into a dict
     # key = name, value = gender
@@ -204,8 +205,8 @@ if __name__ == "__main__":
     # check if user would like to recreate tables
     reset_db = input("Would you like to reset the database? [y/n]:")
     if reset_db.lower() == "y" :
-        con.execute("DROP TABLE Metadata")
-        con.execute("DROP TABLE Books")
+        con.execute("DROP TABLE IF EXISTS Metadata")
+        con.execute("DROP TABLE IF EXISTS Books")
         con.commit()
 
     # create new tables if dont exists
@@ -239,13 +240,13 @@ if __name__ == "__main__":
         # get book text
         text = read_text_from_file(raw_books_path, key)
         
-        # clean text and prep for insert
+        # remove gutenberg into/ending and split into paragraphs
         text = super_cleaner(text, 5,  600)
         text = text.lower()
         text = re.sub("[\\r]*","",text)
         text = text.split("\n\n")
         
-        # split into sentences
+        # split into sentences and clean text
         proccessed = []
         for i in range(len(text)):
             text[i] = re.sub("\n+"," ",text[i])
@@ -253,12 +254,37 @@ if __name__ == "__main__":
             text[i] = text[i].strip()
             text[i] = re.sub("\s+"," ",text[i])
             if text[i] != "[deleted]":
-                s = tokenizer.tokenize(text[i])
-                for j in s:
-                    proccessed.append(j)
-        
+                tmp = tokenizer.tokenize(text[i])
+                for sentence in tmp:
+                    proccessed.append(sentence)
+                
+        # split sentence into smaller sentences with less
+        # then 20 words
+        new_proccessed = []
+        for i in range(len(proccessed)):
+            tmp = proccessed[i].split(" ")
+            tmp_len = len(tmp)
+            if tmp_len < 4:
+                continue
+            elif tmp_len <= 20 and tmp_len >=4:
+                new_proccessed.append(proccessed[i])
+            elif tmp_len > 20:
+               new_sentence = []
+               word_count = 0
+               for word in tmp:
+                   new_sentence.append(word)
+                   word_count += 1
+                   tmp_len -= 1
+                   if word_count % 20 == 0:
+                       new_proccessed.append(' '.join(new_sentence))
+                       word_count = 0
+                       new_sentence = []
+                   if tmp_len == 0 and len(new_sentence)>=4:
+                       new_proccessed.append(' '.join(new_sentence))
+                       break
+
         sents_id = 1 
-        for sents in proccessed:
+        for sents in new_proccessed:
             swc, wc = get_counter_stats(sents, stop_words)
             values = [key, sents_id, sents, wc, swc]
             insert(con, "Books", values)
