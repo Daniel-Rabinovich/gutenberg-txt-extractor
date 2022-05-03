@@ -292,7 +292,7 @@ if __name__ == "__main__":
         
         books_in_db += 1
         
-        if books_in_db % 60 == 0:
+        if books_in_db % 20 == 0:
             con.commit()
             
     con.commit()
