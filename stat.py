@@ -3,6 +3,26 @@ import sqlite3, re
 
 
 
+def get_gender(DB_PATH):
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    r = cur.execute("SELECT gender from Metadata")
+    genders = ["male", "female"]
+    amount = [0,0]
+    for x in r:
+        if x[0] == "M":
+            amount[0] += 1
+        elif x[0] == "F":
+            amount[1] += 1
+
+    con.close()
+    plt.title("Books by Fender")
+    plt.xlabel("Gender")
+    plt.ylabel("Amount")
+    plt.bar(genders, amount)
+    plt.savefig('statistics/gender.png')
+    plt.close()
+
 def get_century(DB_PATH):
     
     # set x,y axis
@@ -52,10 +72,10 @@ def get_book_length(DB_PATH):
         print(x,length)
     
     plt.hist(number_of_paragraphs, 15, facecolor='blue', alpha=0.5, range=[0,7500])
-    plt.title("Number of calculated paragraphs per book")
-    plt.xlabel("Paragraphs")
+    plt.title("Number of calculated sentences per book")
+    plt.xlabel("Sentences")
     plt.ylabel("Amount")
-    plt.savefig('statistics/paragraphs.png')
+    plt.savefig('statistics/sentences.png')
     plt.close()
 
     plt.hist(book_lengths, 15, facecolor='blue', alpha=0.5, range=[0,300000])
@@ -65,29 +85,6 @@ def get_book_length(DB_PATH):
     plt.savefig('statistics/book_lengths.png')
     plt.close()
     con.close()
-
-def get_translated_books(DB_PATH):
-    con = sqlite3.connect(DB_PATH)
-    cur = con.cursor()
-    category = ["Translated","Not translated"]
-    amount = [0,0]
-    r = cur.execute("SELECT author from Metadata")
-    for x in r:
-        x = x[0]
-        x = x.lower()
-        tmp = re.findall(r"\[translator\]", x)
-        if len(tmp) > 0:
-            amount[0] = amount[0] + 1
-        else:
-            amount[1] = amount[1] + 1
-    con.close()
-    
-    plt.title("Translated vs Not Translated")
-    plt.xlabel("")
-    plt.ylabel("Amount")
-    plt.bar(category, amount)
-    plt.savefig('statistics/translated.png')
-    plt.close()
 
 def stop_words_count(DB_PATH):
 
@@ -123,22 +120,21 @@ def vocb_size_per_book(DB_PATH):
     for x in r:
         book_ids.append(x[0])
 
-    vocab_amounts = []
+    vocab_amount = []
     for x in book_ids:
-        vocab = []
+        vocab = set()
         r = cur.execute("SELECT text from Books WHERE book_id = ?",(x,))
         for y in r:
             y = y[0]
-            y = re.sub(r"[a-zA-Z ]",'',y)
+            y = re.sub(r"[^a-z ]",'',y)
             y = y.split(" ")
             for z in y:
-                if z not in vocab:
-                    vocab.append(z)
-        vocab_amounts.append(len(vocab))
-        print(x)
+                vocab.add(z)
+        vocab_amount.append(len(vocab))
+        print(f"{x} {len(vocab)}")
 
     con.close()
-    plt.hist(vocab_amounts, 15, facecolor='blue', alpha=0.5, range=[0,6000])
+    plt.hist(vocab_amount, 15, facecolor='blue', alpha=0.5, range=[0,20000])
     plt.title("Size of vocabulary pre book")
     plt.xlabel("Vocabulary size")
     plt.ylabel("Amount")
@@ -148,8 +144,8 @@ def vocb_size_per_book(DB_PATH):
 
 if __name__ == "__main__":
     db = "data.db"
-    get_century(db)
-    get_book_length(db)
-    get_translated_books(db)
-    stop_words_count(db)
-    vocb_size_per_book(db)
+    #get_century(db)
+    #get_book_length(db)
+    #stop_words_count(db)
+    #vocb_size_per_book(db)
+    get_gender(db)
