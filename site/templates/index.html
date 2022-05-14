@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <title>Classification</title>
+  </head>
+  <body>
+    <header></header>
+    <main>
+    <h1>Gender Classification</h1>
+    <label for="theText">Text:</label><br>
+    <textarea id="theText" cols="50" rows="10"></textarea><br>
+    <button onclick="postBook()">Classify</button>
+    <button onclick="clearText()">clear</button>
+    <p>
+    answer: <div id="answer"></div>
+    </p>
+    </main>
+    <footer></footer>
+  </body>
+  
+  <script>
+    function postBook(){
+      var book = document.getElementById("theText").value;
+      fetch("/", { headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        method: "POST",
+        body: JSON.stringify({"book": book})
+      })
+      .then(response => {
+        document.getElementById("answer").innerHTML = "loading..."
+        return response.json()})
+      .then(json => document.getElementById("answer").innerHTML = json);
+    
+    }
+    
+    
+    function clearText(){
+      document.getElementById("theText").value = '';
+    }
+  </script
+</html>
